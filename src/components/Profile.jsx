@@ -36,7 +36,7 @@ const Profile = ({ onUpdate }) => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('bankToken');
-        const response = await fetch('http://localhost:3001/api/user/profile', {
+        const response = await fetch('https://bankishbackend.onrender.com/api/user/profile', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -75,7 +75,7 @@ const Profile = ({ onUpdate }) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('bankToken');
-      const response = await fetch('http://localhost:3001/api/user/profile', {
+      const response = await fetch('https://bankishbackend.onrender.com/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const Profile = ({ onUpdate }) => {
     
     try {
       const token = localStorage.getItem('bankToken');
-      const response = await fetch('http://localhost:3001/api/user/change-password', {
+      const response = await fetch('https://bankishbackend.onrender.com/api/user/change-password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

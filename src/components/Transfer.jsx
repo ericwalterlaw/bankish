@@ -20,7 +20,7 @@ const Transfer = ({ user }) => {
   const fetchAccounts = async () => {
     try {
       const token = localStorage.getItem('bankToken');
-      const response = await fetch('http://localhost:3001/api/accounts', {
+      const response = await fetch('https://bankishbackend.onrender.com/api/accounts', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -41,7 +41,7 @@ const Transfer = ({ user }) => {
 
     try {
       const token = localStorage.getItem('bankToken');
-      const response = await fetch('http://localhost:3001/api/transactions/transfer', {
+      const response = await fetch('https://bankishbackend.onrender.com/api/transactions/transfer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

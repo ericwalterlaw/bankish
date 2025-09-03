@@ -13,7 +13,7 @@ const Cards = ({ user }) => {
   const fetchCards = async () => {
     try {
       const token = localStorage.getItem('bankToken');
-      const response = await fetch('http://localhost:3001/api/cards', {
+      const response = await fetch('https://bankishbackend.onrender.com/api/cards', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
