@@ -47,7 +47,7 @@ const Dashboard = ({ user }) => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('bankToken');
-      const response = await fetch('http://localhost:3001/api/dashboard/stats', {
+      const response = await fetch('https://bankishbackend.onrender.com/api/dashboard/stats', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -62,7 +62,7 @@ const Dashboard = ({ user }) => {
   const fetchAccounts = async () => {
     try {
       const token = localStorage.getItem('bankToken');
-      const response = await fetch('http://localhost:3001/api/accounts', {
+      const response = await fetch('https://bankishbackend.onrender.com/api/accounts', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
