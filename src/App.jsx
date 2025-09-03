@@ -12,6 +12,8 @@ import Cards from "./components/Cards";
 import Investments from "./components/Investments";
 import Profile from "./components/Profile";
 import Login from "./components/Login";
+import GetHelp from "./components/GetHelp";
+
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -105,6 +107,7 @@ function App() {
               <Route path="/billpay" element={<BillPay user={user} />} />
               <Route path="/cards" element={<Cards user={user} />} />
               <Route path="/investments" element={<Investments user={user} />} />
+              <Route path="/help" element={<GetHelp user={user} />} />
               <Route path="/profile" element={<Profile user={user} onUpdate={fetchUserData} />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
