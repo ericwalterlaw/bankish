@@ -19,7 +19,7 @@ const Login = ({ onLogin }) => {
 
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const response = await fetch(`http://localhost:3001${endpoint}`, {
+      const response = await fetch(`https://bankishbackend.onrender.com${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
