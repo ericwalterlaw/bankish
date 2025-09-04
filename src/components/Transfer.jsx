@@ -69,7 +69,7 @@ const Transfer = ({ user }) => {
     }));
   };
 
-  // 🔥 Fetch real crypto fees
+  // Mock fee fetching for crypto
   useEffect(() => {
     if (
       transferData.transferType === "crypto" &&
@@ -77,55 +77,17 @@ const Transfer = ({ user }) => {
     ) {
       const fetchFee = async () => {
         try {
-          let feeText = "N/A";
-
-          if (transferData.crypto.currency === "BTC") {
-            const res = await fetch("https://mempool.space/api/v1/fees/recommended");
-            const data = await res.json();
-            // fee in satoshis per vByte → rough estimate
-            feeText = `${data.fastestFee} sats/vB`;
-          }
-
-          if (transferData.crypto.currency === "ETH") {
-            const apiKey = "YOUR_ETHERSCAN_API_KEY"; // ⚠️ put in .env
-            const res = await fetch(
-              `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${apiKey}`
-            );
-            const data = await res.json();
-            if (data.status === "1") {
-              feeText = `${data.result.ProposeGasPrice} gwei`;
-            }
-          }
-
-          if (transferData.crypto.currency === "USDT") {
-            // assume ERC20 for now (same as ETH)
-            const apiKey = "YOUR_ETHERSCAN_API_KEY";
-            const res = await fetch(
-              `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${apiKey}`
-            );
-            const data = await res.json();
-            if (data.status === "1") {
-              feeText = `${data.result.ProposeGasPrice} gwei (ERC20)`;
-            }
-            // If you later want TRC20 → TronGrid API here
-          }
-
+          // For now just fake a random fee
+          const fee = (Math.random() * 0.0005).toFixed(6);
           setTransferData((prev) => ({
             ...prev,
             crypto: {
               ...prev.crypto,
-              networkFee: feeText,
+              networkFee: `${fee} ${prev.crypto.currency}`,
             },
           }));
         } catch (err) {
           console.error("Fee fetch failed", err);
-          setTransferData((prev) => ({
-            ...prev,
-            crypto: {
-              ...prev.crypto,
-              networkFee: "Error fetching fee",
-            },
-          }));
         }
       };
       fetchFee();
@@ -258,6 +220,105 @@ const Transfer = ({ user }) => {
                   ))}
                 </div>
               </div>
+
+              {/* Internal */}
+              {transferData.transferType === "internal" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    To Account
+                  </label>
+                  <select
+                    value={transferData.internal.toAccount}
+                    onChange={(e) =>
+                      handleChange("internal", "toAccount", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  >
+                    <option value="">Select Account</option>
+                    {accounts
+                      .filter(
+                        (a) => a._id !== transferData.internal.fromAccountId
+                      )
+                      .map((a) => (
+                        <option key={a._id} value={a.accountNumber}>
+                          {a.accountType} (••••{a.accountNumber.slice(-4)})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+
+              {/* SWIFT */}
+              {transferData.transferType === "swift" && (
+                <>
+                  <input
+                    placeholder="Beneficiary Name"
+                    value={transferData.swift.beneficiaryName}
+                    onChange={(e) =>
+                      handleChange("swift", "beneficiaryName", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  <input
+                    placeholder="Beneficiary IBAN/Account"
+                    value={transferData.swift.beneficiaryIban}
+                    onChange={(e) =>
+                      handleChange("swift", "beneficiaryIban", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  <input
+                    placeholder="SWIFT/BIC Code"
+                    value={transferData.swift.swiftCode}
+                    onChange={(e) =>
+                      handleChange("swift", "swiftCode", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  <input
+                    placeholder="Beneficiary Address"
+                    value={transferData.swift.beneficiaryAddress}
+                    onChange={(e) =>
+                      handleChange(
+                        "swift",
+                        "beneficiaryAddress",
+                        e.target.value
+                      )
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </>
+              )}
+
+              {/* SEPA */}
+              {transferData.transferType === "sepa" && (
+                <>
+                  <input
+                    placeholder="Beneficiary Name"
+                    value={transferData.sepa.beneficiaryName}
+                    onChange={(e) =>
+                      handleChange("sepa", "beneficiaryName", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  <input
+                    placeholder="Beneficiary IBAN"
+                    value={transferData.sepa.beneficiaryIban}
+                    onChange={(e) =>
+                      handleChange("sepa", "beneficiaryIban", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  <input
+                    placeholder="Payment Reference"
+                    value={transferData.sepa.reference}
+                    onChange={(e) =>
+                      handleChange("sepa", "reference", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </>
+              )}
 
               {/* CRYPTO */}
               {transferData.transferType === "crypto" && (
