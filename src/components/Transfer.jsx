@@ -420,53 +420,6 @@ const Transfer = ({ user }) => {
             </form>
           </div>
         </div>
-
-        {/* Transfer Summary */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Transfer Summary
-            </h3>
-            <div className="space-y-4 text-sm">
-              <p>
-                <span className="font-medium">Type:</span>{" "}
-                {transferData.transferType.toUpperCase()}
-              </p>
-              {transferData.transferType === "crypto" ? (
-                <>
-                  <p>
-                    <span className="font-medium">Currency:</span>{" "}
-                    {transferData.crypto.currency}
-                  </p>
-                  <p>
-                    <span className="font-medium">To:</span>{" "}
-                    {transferData.crypto.toAddress || "Not set"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Amount:</span>{" "}
-                    {transferData.crypto.amount || "0"}{" "}
-                    {transferData.crypto.currency}
-                  </p>
-                  <p>
-                    <span className="font-medium">Fee:</span>{" "}
-                    {transferData.crypto.networkFee || "Calculating..."}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    <span className="font-medium">Amount:</span>{" "}
-                    {transferData.common.amount || "0"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Description:</span>{" "}
-                    {transferData.common.description || "-"}
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
