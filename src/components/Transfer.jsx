@@ -108,6 +108,17 @@ const Transfer = ({ user }) => {
       ...(transferData[transferData.transferType]),
     };
 
+    // Normalize recipient field for backend
+    if (transferData.transferType === "swift") {
+      payload.toAccount = transferData.swift.beneficiaryIban;
+    }
+    if (transferData.transferType === "sepa") {
+      payload.toAccount = transferData.sepa.beneficiaryIban;
+    }
+    if (transferData.transferType === "crypto") {
+      payload.toAccount = transferData.crypto.toAddress;
+    }
+
     try {
       const token = localStorage.getItem("bankToken");
       const response = await fetch(
@@ -137,18 +148,6 @@ const Transfer = ({ user }) => {
       setLoading(false);
     }
   };
-
-  const getSelectedAccount = () => {
-    return accounts.find(
-      (account) => account._id === transferData.internal.fromAccountId
-    );
-  };
-
-  const formatCurrency = (amount) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
 
   if (success) {
     return (
@@ -223,29 +222,40 @@ const Transfer = ({ user }) => {
 
               {/* Internal */}
               {transferData.transferType === "internal" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    To Account
-                  </label>
-                  <select
-                    value={transferData.internal.toAccount}
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      To Account
+                    </label>
+                    <select
+                      value={transferData.internal.toAccount}
+                      onChange={(e) =>
+                        handleChange("internal", "toAccount", e.target.value)
+                      }
+                      className="w-full px-4 py-3 border rounded-lg"
+                    >
+                      <option value="">Select Account</option>
+                      {accounts
+                        .filter(
+                          (a) => a._id !== transferData.internal.fromAccountId
+                        )
+                        .map((a) => (
+                          <option key={a._id} value={a.accountNumber}>
+                            {a.accountType} (••••{a.accountNumber.slice(-4)})
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    value={transferData.common.amount}
                     onChange={(e) =>
-                      handleChange("internal", "toAccount", e.target.value)
+                      handleChange("common", "amount", e.target.value)
                     }
-                    className="w-full px-4 py-3 border rounded-lg"
-                  >
-                    <option value="">Select Account</option>
-                    {accounts
-                      .filter(
-                        (a) => a._id !== transferData.internal.fromAccountId
-                      )
-                      .map((a) => (
-                        <option key={a._id} value={a.accountNumber}>
-                          {a.accountType} (••••{a.accountNumber.slice(-4)})
-                        </option>
-                      ))}
-                  </select>
-                </div>
+                    className="w-full px-4 py-3 border rounded-lg mt-4"
+                  />
+                </>
               )}
 
               {/* SWIFT */}
@@ -279,13 +289,18 @@ const Transfer = ({ user }) => {
                     placeholder="Beneficiary Address"
                     value={transferData.swift.beneficiaryAddress}
                     onChange={(e) =>
-                      handleChange(
-                        "swift",
-                        "beneficiaryAddress",
-                        e.target.value
-                      )
+                      handleChange("swift", "beneficiaryAddress", e.target.value)
                     }
                     className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    value={transferData.common.amount}
+                    onChange={(e) =>
+                      handleChange("common", "amount", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg mt-4"
                   />
                 </>
               )}
@@ -316,6 +331,15 @@ const Transfer = ({ user }) => {
                       handleChange("sepa", "reference", e.target.value)
                     }
                     className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    value={transferData.common.amount}
+                    onChange={(e) =>
+                      handleChange("common", "amount", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border rounded-lg mt-4"
                   />
                 </>
               )}
