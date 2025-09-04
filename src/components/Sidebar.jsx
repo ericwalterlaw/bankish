@@ -10,7 +10,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Phone
+  Phone,
+  FileUser
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -19,7 +20,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, onLogout }) => {
 
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
-    { path: "/accounts", label: "Accounts", icon: <CreditCard className="w-5 h-5" /> },
+    { path: "/accounts", label: "Accounts", icon: <FileUser className="w-5 h-5" /> },
     { path: "/transactions", label: "Transactions", icon: <Repeat className="w-5 h-5" /> },
     { path: "/transfer", label: "Transfer", icon: <FileText className="w-5 h-5" /> },
     { path: "/billpay", label: "Bill Pay", icon: <Wallet className="w-5 h-5" /> },

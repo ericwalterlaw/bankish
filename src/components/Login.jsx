@@ -27,6 +27,15 @@ const Login = ({ onLogin }) => {
         body: JSON.stringify(formData),
       });
 
+      // const response = await fetch(`http://localhost:3001${endpoint}`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(formData),
+      // });
+
+
       const data = await response.json();
 
       if (response.ok) {
