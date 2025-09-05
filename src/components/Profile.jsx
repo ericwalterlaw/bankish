@@ -58,8 +58,11 @@ const Profile = ({ onUpdate }) => {
               city: data.address?.city || '',
               state: data.address?.state || '',
               zipCode: data.address?.zipCode || ''
-            }
+            },
+            avatar: data.avatar,
           });
+          setAvatar(data.avatar);
+
         } else {
           console.error('Failed to fetch profile');
         }
