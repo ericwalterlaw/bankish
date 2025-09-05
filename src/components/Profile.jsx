@@ -3,6 +3,8 @@ import { User, Mail, Phone, MapPin, Shield, Bell, Eye, EyeOff } from 'lucide-rea
 
 const Profile = ({ onUpdate }) => {
   const [activeTab, setActiveTab] = useState('personal');
+  const [avatar, setAvatar] = useState(null);
+
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -70,6 +72,34 @@ const Profile = ({ onUpdate }) => {
 
     fetchProfile();
   }, []);
+
+  const handleAvatarChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  try {
+    const token = localStorage.getItem("bankToken");
+    const response = await fetch("https://bankishbackend.onrender.com/api/user/upload-avatar", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert("Avatar updated successfully!");
+      setAvatar(data.avatar);
+    }
+  } catch (error) {
+    console.error("Upload failed:", error);
+  }
+};
+
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -150,20 +180,39 @@ const Profile = ({ onUpdate }) => {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-4">
-        <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-          <span className="text-white text-xl font-bold">
-            {profileData.firstName?.charAt(0)}{profileData.lastName?.charAt(0)}
-          </span>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            {profileData.firstName} {profileData.lastName}
-          </h2>
-          <p className="text-gray-600">Manage your account settings and preferences</p>
-        </div>
+ {/* Profile Header */}
+<div className="flex items-center space-x-4">
+  <div className="relative w-20 h-20">
+    {avatar || profileData.avatar ? (
+      <img
+        src={avatar || profileData.avatar}
+        alt="avatar"
+        className="w-20 h-20 rounded-full object-cover border border-gray-200"
+      />
+    ) : (
+      <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center">
+        <span className="text-white text-2xl font-bold">
+          {profileData.firstName?.charAt(0)}
+          {profileData.lastName?.charAt(0)}
+        </span>
       </div>
+    )}
+
+    {/* Upload button */}
+    <label className="absolute bottom-0 right-0 bg-amber-950 p-1 rounded cursor-pointer shadow">
+      <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
+      <span className="text-white text-xs">✏️</span>
+    </label>
+  </div>
+
+  <div>
+    <h2 className="text-2xl font-bold text-gray-900">
+      {profileData.firstName} {profileData.lastName}
+    </h2>
+    <p className="text-gray-600">Manage your account settings and preferences</p>
+  </div>
+</div>
+
 
       {/* Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">

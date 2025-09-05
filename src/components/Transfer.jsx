@@ -1,10 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Send, Users, Building2, ArrowRight, Check, Globe } from "lucide-react";
+import {
+  Send,
+  Users,
+  Building2,
+  Globe,
+  Check,
+  Lock,
+} from "lucide-react";
 
 const Transfer = ({ user }) => {
   const [accounts, setAccounts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [awcCode, setAwcCode] = useState(""); // fetched from backend
+  const [enteredAwc, setEnteredAwc] = useState(""); // user input in modal
+  const [showAwcModal, setShowAwcModal] = useState(false);
+
+  const [loading, setLoading] = useState(false); // transfer submit
+  const [processing, setProcessing] = useState(false); // pre-modal delay
   const [success, setSuccess] = useState(false);
+
+  const [awcError, setAwcError] = useState(""); // inline error
 
   const [transferData, setTransferData] = useState({
     transferType: "internal",
@@ -34,8 +48,10 @@ const Transfer = ({ user }) => {
 
   useEffect(() => {
     fetchAccounts();
+    fetchAwcCode();
   }, []);
 
+  // Fetch user accounts
   const fetchAccounts = async () => {
     try {
       const token = localStorage.getItem("bankToken");
@@ -62,6 +78,25 @@ const Transfer = ({ user }) => {
     }
   };
 
+  // Fetch user's AWC code
+  const fetchAwcCode = async () => {
+    try {
+      const token = localStorage.getItem("bankToken");
+      const response = await fetch(
+        "https://bankishbackend.onrender.com/api/auth/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setAwcCode(data.awcCode); // assumes backend sends { awcCode: "1234" }
+      }
+    } catch (error) {
+      console.error("Error fetching AWC code:", error);
+    }
+  };
+
   const handleChange = (section, field, value) => {
     setTransferData((prev) => ({
       ...prev,
@@ -77,7 +112,6 @@ const Transfer = ({ user }) => {
     ) {
       const fetchFee = async () => {
         try {
-          // For now just fake a random fee
           const fee = (Math.random() * 0.0005).toFixed(6);
           setTransferData((prev) => ({
             ...prev,
@@ -98,8 +132,24 @@ const Transfer = ({ user }) => {
     transferData.crypto.currency,
   ]);
 
-  const handleSubmit = async (e) => {
+  // Handle transfer form submit → show processing, then AWC modal
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setProcessing(true);
+    setTimeout(() => {
+      setProcessing(false);
+      setShowAwcModal(true);
+    }, 2000); // 2s delay before modal
+  };
+
+  // Confirm transfer after AWC validation
+  const confirmTransfer = async () => {
+    if (enteredAwc !== awcCode) {
+      setAwcError("Invalid AWC code. Please try again.");
+      return;
+    }
+
+    setAwcError("");
     setLoading(true);
 
     const payload = {
@@ -108,7 +158,6 @@ const Transfer = ({ user }) => {
       ...(transferData[transferData.transferType]),
     };
 
-    // Normalize recipient field for backend
     if (transferData.transferType === "swift") {
       payload.toAccount = transferData.swift.beneficiaryIban;
     }
@@ -140,15 +189,18 @@ const Transfer = ({ user }) => {
         await fetchAccounts();
         setTimeout(() => setSuccess(false), 5000);
       } else {
-        alert(data.message);
+        setAwcError(data.message || "Transfer failed.");
       }
     } catch (error) {
-      alert("Network error. Please try again.");
+      setAwcError("Network error. Please try again.");
     } finally {
       setLoading(false);
+      setShowAwcModal(false);
+      setEnteredAwc("");
     }
   };
 
+  // Success screen
   if (success) {
     return (
       <div className="max-w-2xl mx-auto">
@@ -179,8 +231,68 @@ const Transfer = ({ user }) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Transfer Form */}
+      {/* Processing overlay */}
+      {processing && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-700 font-medium">
+              Processing transfer...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* AWC Modal */}
+      {showAwcModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <Lock className="w-6 h-6 text-blue-600" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Enter AWC Code
+              </h2>
+            </div>
+            <p className="text-sm text-red-500 mb-4">
+              If you don’t have your AWC, please contact your account manager
+              or the support team.
+            </p>
+            <input
+              type="password"
+              value={enteredAwc}
+              onChange={(e) => setEnteredAwc(e.target.value)}
+              placeholder="Enter your AWC code"
+              className="w-full px-4 py-3 border rounded-lg mb-2"
+            />
+            {awcError && (
+              <p className="text-red-500 text-sm mb-2">{awcError}</p>
+            )}
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowAwcModal(false);
+                  setEnteredAwc("");
+                  setAwcError("");
+                }}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmTransfer}
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? "Confirming..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Your transfer form goes here (same as before) */}
+      {/* ... keep your existing form code here ... */}
+              {/* Transfer Form */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -343,49 +455,63 @@ const Transfer = ({ user }) => {
                   />
                 </>
               )}
+{/* CRYPTO */}
+{transferData.transferType === "crypto" && (
+  <>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Currency
+    </label>
+    <select
+      value={transferData.crypto.currency}
+      onChange={(e) =>
+        handleChange("crypto", "currency", e.target.value)
+      }
+      className="w-full px-4 py-3 border rounded-lg"
+    >
+      <option value="BTC">Bitcoin (BTC)</option>
+      <option value="ETH">Ethereum (ETH)</option>
+      <option value="USDT">Tether (USDT)</option>
+    </select>
 
-              {/* CRYPTO */}
-              {transferData.transferType === "crypto" && (
-                <>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency
-                  </label>
-                  <select
-                    value={transferData.crypto.currency}
-                    onChange={(e) =>
-                      handleChange("crypto", "currency", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border rounded-lg"
-                  >
-                    <option value="BTC">Bitcoin (BTC)</option>
-                    <option value="ETH">Ethereum (ETH)</option>
-                    <option value="USDT">Tether (USDT)</option>
-                  </select>
-                  <input
-                    placeholder="Recipient Wallet Address"
-                    value={transferData.crypto.toAddress}
-                    onChange={(e) =>
-                      handleChange("crypto", "toAddress", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border rounded-lg mt-4"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Amount"
-                    value={transferData.crypto.amount}
-                    onChange={(e) =>
-                      handleChange("crypto", "amount", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border rounded-lg mt-4"
-                  />
-                  {transferData.crypto.amount && (
-                    <p className="text-sm text-gray-600 mt-2">
-                      Estimated Network Fee:{" "}
-                      {transferData.crypto.networkFee || "Fetching..."}
-                    </p>
-                  )}
-                </>
-              )}
+    {/* Auto Network Display */}
+    <div className="mt-4">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Network
+      </label>
+      <div className="w-full px-4 py-3 border rounded-lg bg-gray-50 text-gray-800">
+        {transferData.crypto.currency === "BTC" && "BTC"}
+        {transferData.crypto.currency === "ETH" && "ERC20"}
+        {transferData.crypto.currency === "USDT" && "TRC20"}
+      </div>
+    </div>
+
+    <input
+      placeholder="Recipient Wallet Address"
+      value={transferData.crypto.toAddress}
+      onChange={(e) =>
+        handleChange("crypto", "toAddress", e.target.value)
+      }
+      className="w-full px-4 py-3 border rounded-lg mt-4"
+    />
+    <input
+      type="number"
+      placeholder="Amount"
+      value={transferData.crypto.amount}
+      onChange={(e) =>
+        handleChange("crypto", "amount", e.target.value)
+      }
+      className="w-full px-4 py-3 border rounded-lg mt-4"
+    />
+
+    {transferData.crypto.amount && (
+      <p className="text-sm text-gray-600 mt-2">
+        Estimated Network Fee:{" "}
+        {transferData.crypto.networkFee || "Fetching..."}
+      </p>
+    )}
+  </>
+)}
+
 
               {/* Common */}
               <div>
@@ -420,7 +546,7 @@ const Transfer = ({ user }) => {
             </form>
           </div>
         </div>
-      </div>
+     
     </div>
   );
 };
