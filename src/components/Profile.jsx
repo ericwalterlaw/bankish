@@ -82,7 +82,7 @@ const Profile = ({ onUpdate }) => {
 
   try {
     const token = localStorage.getItem("bankToken");
-    const response = await fetch("https://bankishbackend.onrender.com/api/user/upload-avatar", {
+    const response = await fetch("https://bankishbackend.onrender.com/api/upload-avatar", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`

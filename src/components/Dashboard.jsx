@@ -8,6 +8,8 @@ import {
   ArrowDownRight,
   Eye,
   EyeOff,
+  PoundSterling,
+  Euro
 } from 'lucide-react';
 import { Line, Doughnut } from 'react-chartjs-2';
 import {
@@ -39,9 +41,14 @@ const Dashboard = ({ user }) => {
   const [showBalance, setShowBalance] = useState(true);
   const [loading, setLoading] = useState(true);
 
+  // Currency State
+  const [currency, setCurrency] = useState("USD");
+  const [rates, setRates] = useState({ USD: 1, GBP: 0.79, EUR: 0.92 });
+
   useEffect(() => {
     fetchDashboardData();
     fetchAccounts();
+    fetchRates();
   }, []);
 
   const fetchDashboardData = async () => {
@@ -72,8 +79,24 @@ const Dashboard = ({ user }) => {
     }
   };
 
-  const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  const fetchRates = async () => {
+    try {
+      const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=USD,GBP,EUR");
+      const data = await res.json();
+      if (data && data.rates) {
+        setRates(data.rates);
+      }
+    } catch (error) {
+      console.error("Error fetching rates:", error);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    if (!amount) return "0";
+
+    const converted = amount * (rates[currency] || 1);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(converted);
+  };
 
   const getTransactionIcon = (type) => {
     switch (type) {
@@ -129,11 +152,19 @@ const Dashboard = ({ user }) => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {/* Currency Switcher */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-100 rounded-lg">
+          <h1 className="font-bold text-xl mb-4">Currency</h1>
+          <div className="flex items-center mb-4 space-x-4">
+            <button onClick={() => setCurrency("USD")} className={`p-3 rounded-lg ${currency === "USD" ? "bg-green-100" : ""}`}>
               <DollarSign className="w-6 h-6 text-green-600" />
-            </div>
+            </button>
+            <button onClick={() => setCurrency("GBP")} className={`p-3 rounded-lg ${currency === "GBP" ? "bg-blue-100" : ""}`}>
+              <PoundSterling className="w-6 h-6 text-blue-600" />
+            </button>
+            <button onClick={() => setCurrency("EUR")} className={`p-3 rounded-lg ${currency === "EUR" ? "bg-purple-100" : ""}`}>
+              <Euro className="w-6 h-6 text-purple-600" />
+            </button>
             <button onClick={() => setShowBalance(!showBalance)}>
               {showBalance ? (
                 <Eye className="w-5 h-5 text-gray-400" />
@@ -148,6 +179,7 @@ const Dashboard = ({ user }) => {
           </p>
         </div>
 
+        {/* Accounts, Spending, etc */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="p-3 bg-blue-100 rounded-lg mb-4 w-fit">
             <CreditCard className="w-6 h-6 text-blue-600" />
