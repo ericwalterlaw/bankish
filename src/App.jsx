@@ -13,6 +13,8 @@ import Investments from "./components/Investments";
 import Profile from "./components/Profile";
 import Login from "./components/Login";
 import GetHelp from "./components/GetHelp";
+import AdminDashboard from "./components/AdminDashboard";
+import AdminRoute from "./components/AdminRoute";
 
 
 function App() {
@@ -110,6 +112,15 @@ function App() {
               <Route path="/help" element={<GetHelp user={user} />} />
               <Route path="/profile" element={<Profile user={user} onUpdate={fetchUserData} />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                      {/* Admin Routes */}
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute user={user}>
+                    <AdminDashboard user={user} />
+                  </AdminRoute>
+                }
+              />
             </Routes>
           </main>
         </div>
