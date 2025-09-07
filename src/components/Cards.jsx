@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Eye, EyeOff, Lock, Unlock, Plus, MoreHorizontal } from 'lucide-react';
+import { api } from '../api';
+
+
 
 const Cards = ({ user }) => {
   const [cards, setCards] = useState([]);
@@ -10,20 +13,16 @@ const Cards = ({ user }) => {
     fetchCards();
   }, []);
 
-  const fetchCards = async () => {
-    try {
-      const token = localStorage.getItem('bankToken');
-      const response = await fetch('https://bankishbackend.onrender.com/api/cards', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      setCards(data);
-    } catch (error) {
-      console.error('Error fetching cards:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchCards = async () => {
+  try {
+    const data = await api.get("/cards"); // ✅ token auto-attached
+    setCards(data);
+  } catch (error) {
+    console.error("Error fetching cards:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const toggleCardNumberVisibility = (cardId) =>
     setShowCardNumbers((prev) => ({ ...prev, [cardId]: !prev[cardId] }));

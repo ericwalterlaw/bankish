@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Download, ArrowUpRight, ArrowDownRight, DollarSign } from 'lucide-react';
+import { api } from '../api';
+
 
 const Transactions = ({ user }) => {
   const [transactions, setTransactions] = useState([]);
@@ -18,22 +20,18 @@ const Transactions = ({ user }) => {
     filterTransactions();
   }, [transactions, searchTerm, filterType]);
 
-  const fetchTransactions = async () => {
-    try {
-      const token = localStorage.getItem('bankToken');
-      const response = await fetch('https://bankishbackend.onrender.com/api/transactions', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
-      setTransactions(data);
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+const fetchTransactions = async () => {
+  setLoading(true);
+  try {
+    const data = await api.get("/transactions"); // ✅ cleaner GET
+    setTransactions(data);
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const filterTransactions = () => {
     let filtered = transactions;

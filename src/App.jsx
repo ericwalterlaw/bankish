@@ -15,6 +15,7 @@ import Login from "./components/Login";
 import GetHelp from "./components/GetHelp";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminRoute from "./components/AdminRoute";
+import { api } from "./api";
 
 
 function App() {
@@ -31,28 +32,18 @@ function App() {
     }
   }, []);
 
-  const fetchUserData = async () => {
-    try {
-      const token = localStorage.getItem("bankToken");
-      const response = await fetch("https://bankishbackend.onrender.com/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else {
-        localStorage.removeItem("bankToken");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      localStorage.removeItem("bankToken");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const fetchUserData = async () => {
+  setIsLoading(true);
+  try {
+    const userData = await api.get("/auth/me"); // ✅ use api.get
+    setUser(userData);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    localStorage.removeItem("bankToken");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleLogin = (userData) => {
     setUser(userData.user);
@@ -108,7 +99,7 @@ function App() {
               <Route path="/transfer" element={<Transfer user={user} />} />
               <Route path="/billpay" element={<BillPay user={user} />} />
               <Route path="/cards" element={<Cards user={user} />} />
-              <Route path="/investments" element={<Investments user={user} />} />
+              {/* <Route path="/investments" element={<Investments user={user} />} /> */}
               <Route path="/help" element={<GetHelp user={user} />} />
               <Route path="/profile" element={<Profile user={user} onUpdate={fetchUserData} />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />

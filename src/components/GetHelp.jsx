@@ -14,7 +14,7 @@ const GetHelp = () => {
       icon: Mail,
       title: "Email Support",
       description: "Send us a message and we'll respond within 24 hours",
-      details: "support@horizonbank.com",
+      details: "support@horizon.com",
       available: "Mon-Fri, 9am-5pm EST"
     },
     {

@@ -25,7 +25,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, onLogout }) => {
     { path: "/transfer", label: "Transfer", icon: <FileText className="w-5 h-5" /> },
     { path: "/billpay", label: "Bill Pay", icon: <Wallet className="w-5 h-5" /> },
     { path: "/cards", label: "Cards", icon: <CreditCard className="w-5 h-5" /> },
-    { path: "/investments", label: "Investments", icon: <BarChart2 className="w-5 h-5" /> },
+    // { path: "/investments", label: "Investments", icon: <BarChart2 className="w-5 h-5" /> },
     { path: "/profile", label: "Profile", icon: <User className="w-5 h-5" /> },
     { path: "/help", label: "Customer Service", icon: <Phone className="w-5 h-5" /> },
   ];

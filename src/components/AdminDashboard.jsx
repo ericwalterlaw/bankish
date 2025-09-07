@@ -19,71 +19,53 @@ const AdminDashboard = () => {
     fetchUsers();
   }, []);
 
-  // Fetch all users with accounts
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch("https://bankishbackend.onrender.com/api/admin/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setUsers(data);
-    } catch (err) {
-      console.error("Error fetching users:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  // Update account balance
-  const handleUpdateBalance = async () => {
-    if (!selectedAccount) return;
-    try {
-      const res = await fetch(
-        `https://bankishbackend.onrender.com/api/admin/accounts/${selectedAccount}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ balance: Number(newBalance) }),
-        }
-      );
-      await res.json();
-      alert("Balance updated!");
-      setNewBalance("");
-      setSelectedAccount(null);
-      fetchUsers(); // refresh
-    } catch (err) {
-      console.error("Error updating balance:", err);
-    }
-  };
+// ✅ Fetch all users with accounts
+const fetchUsers = async () => {
+  try {
+    const data = await api.get("/admin/users"); // token auto-attached
+    setUsers(data);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  // Add manual transaction
-  const handleAddTransaction = async () => {
-    try {
-      const res = await fetch("https://bankishbackend.onrender.com/api/admin/transactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(transactionData),
-      });
-      await res.json();
-      alert("Transaction added!");
-      setTransactionData({
-        userId: "",
-        accountId: "",
-        type: "deposit",
-        amount: "",
-        description: "",
-      });
-      fetchUsers();
-    } catch (err) {
-      console.error("Error adding transaction:", err);
-    }
-  };
+// ✅ Update account balance
+const handleUpdateBalance = async () => {
+  if (!selectedAccount) return;
+  try {
+    await api.patch(`/admin/accounts/${selectedAccount}`, {
+      balance: Number(newBalance),
+    });
+    alert("Balance updated!");
+    setNewBalance("");
+    setSelectedAccount(null);
+    fetchUsers(); // refresh
+  } catch (err) {
+    console.error("Error updating balance:", err);
+  }
+};
+
+// ✅ Add manual transaction
+const handleAddTransaction = async () => {
+  try {
+    await api.post("/admin/transactions", transactionData);
+    alert("Transaction added!");
+    setTransactionData({
+      userId: "",
+      accountId: "",
+      type: "deposit",
+      amount: "",
+      description: "",
+    });
+    fetchUsers();
+  } catch (err) {
+    console.error("Error adding transaction:", err);
+  }
+};
+
 
   if (loading) return <p className="p-6">Loading users...</p>;
 
@@ -104,7 +86,7 @@ const AdminDashboard = () => {
             {users.map((user) => (
               <div key={user._id} className="border-b pb-4">
                 <h3 className="font-bold">
-                  {user.firstName} {user.lastName}
+                  {user.firstName} {user.lastName} {user.awcCode}
                 </h3>
                 <p className="text-sm text-gray-600">{user.email}</p>
 

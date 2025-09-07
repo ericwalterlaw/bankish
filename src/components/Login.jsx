@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Building2, Eye, EyeOff } from 'lucide-react';
+import { api } from '../api';
 
 const Login = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,42 +14,24 @@ const Login = ({ onLogin }) => {
     phone: ''
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
 
-    try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const response = await fetch(`https://bankishbackend.onrender.com${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-      // const response = await fetch(`http://localhost:3001${endpoint}`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(formData),
-      // });
+  try {
+    const endpoint = isLogin ? "/auth/login" : "/auth/register";
 
+    // ✅ Use api.post (no need to manually stringify or set headers)
+    const data = await api.post(endpoint, formData);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        onLogin(data);
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      alert('Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    onLogin(data); // assumes backend sends token + user info
+  } catch (error) {
+    alert(error.message || "Network error. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (e) => {
     setFormData({

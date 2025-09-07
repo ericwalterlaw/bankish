@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Plus, ArrowUpRight, ArrowDownRight, MoreHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { api } from '../api';
+
 
 
 const Accounts = () => {
@@ -12,22 +14,18 @@ const Accounts = () => {
     fetchAccounts();
   }, []);
 
-  const fetchAccounts = async () => {
-    try {
-      const token = localStorage.getItem('bankToken');
-      const response = await fetch('https://bankishbackend.onrender.com/api/accounts', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      setAccounts(data);
-    } catch (error) {
-      console.error('Error fetching accounts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchAccounts = async () => {
+  setLoading(true);
+  try {
+    const data = await api.get("/accounts"); // clean GET via wrapper
+    setAccounts(data);
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat('en-US', {

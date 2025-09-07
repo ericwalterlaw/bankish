@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Shield, Bell, Eye, EyeOff } from 'lucide-react';
+import { api } from '../api';
+
 
 const Profile = ({ onUpdate }) => {
   const [activeTab, setActiveTab] = useState('personal');
@@ -35,48 +37,37 @@ const Profile = ({ onUpdate }) => {
 
   // 🔹 Fetch user profile on mount
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('bankToken');
-        const response = await fetch('https://bankishbackend.onrender.com/api/user/profile', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+   const fetchProfile = async () => {
+  setLoading(true);
+  try {
+    const data = await api.get("/user/profile");
+    setProfileData({
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
+      email: data.email || "",
+      phone: data.phone || "",
+      dateOfBirth: data.dateOfBirth ? data.dateOfBirth.substring(0, 10) : "",
+      address: {
+        street: data.address?.street || "",
+        city: data.address?.city || "",
+        state: data.address?.state || "",
+        zipCode: data.address?.zipCode || "",
+      },
+      avatar: data.avatar,
+    });
+    setAvatar(data.avatar);
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-        if (response.ok) {
-          const data = await response.json();
-          setProfileData({
-            firstName: data.firstName || '',
-            lastName: data.lastName || '',
-            email: data.email || '',
-            phone: data.phone || '',
-            dateOfBirth: data.dateOfBirth ? data.dateOfBirth.substring(0, 10) : '',
-            address: {
-              street: data.address?.street || '',
-              city: data.address?.city || '',
-              state: data.address?.state || '',
-              zipCode: data.address?.zipCode || ''
-            },
-            avatar: data.avatar,
-          });
-          setAvatar(data.avatar);
-
-        } else {
-          console.error('Failed to fetch profile');
-        }
-      } catch (error) {
-        console.error('Network error while fetching profile:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchProfile();
   }, []);
 
-  const handleAvatarChange = async (e) => {
+const handleAvatarChange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
@@ -84,81 +75,54 @@ const Profile = ({ onUpdate }) => {
   formData.append("avatar", file);
 
   try {
-    const token = localStorage.getItem("bankToken");
-    const response = await fetch("https://bankishbackend.onrender.com/api/upload-avatar", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`
-      },
-      body: formData
-    });
+    const data = await api.post("/upload-avatar", formData, true); 
+    // `true` here could be a flag you handle in api.js for multipart/form-data
 
-    const data = await response.json();
     if (data.success) {
       alert("Avatar updated successfully!");
       setAvatar(data.avatar);
     }
   } catch (error) {
     console.error("Upload failed:", error);
+    alert("Failed to upload avatar");
   }
 };
 
 
-  const handleProfileUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('bankToken');
-      const response = await fetch('https://bankishbackend.onrender.com/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(profileData)
-      });
-      
-      if (response.ok) {
-        alert('Profile updated successfully!');
-        if (onUpdate) onUpdate();
-      } else {
-        alert('Failed to update profile');
-      }
-    } catch (error) {
-      alert('Network error. Please try again.');
-    }
-  };
+const handleProfileUpdate = async (e) => {
+  e.preventDefault();
+  try {
+    await api.put("/user/profile", profileData);
+    alert("Profile updated successfully!");
+    if (onUpdate) onUpdate();
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    alert("Failed to update profile");
+  }
+};
 
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match');
-      return;
-    }
-    
-    try {
-      const token = localStorage.getItem('bankToken');
-      const response = await fetch('https://bankishbackend.onrender.com/api/user/change-password', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        })
-      });
-      
-      if (response.ok) {
-        alert('Password changed successfully!');
-        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      } else {
-        alert('Failed to change password');
-      }
-    } catch (error) {
-      alert('Network error. Please try again.');
-    }
-  };
+
+const handlePasswordChange = async (e) => {
+  e.preventDefault();
+  if (passwordData.newPassword !== passwordData.confirmPassword) {
+    alert("New passwords do not match");
+    return;
+  }
+
+  try {
+    await api.put("/user/change-password", {
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword,
+    });
+
+    alert("Password changed successfully!");
+    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    alert("Failed to change password");
+  }
+};
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

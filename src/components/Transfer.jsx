@@ -7,6 +7,8 @@ import {
   Check,
   Lock,
 } from "lucide-react";
+import { api } from "../api";
+
 
 const Transfer = ({ user }) => {
   const [accounts, setAccounts] = useState([]);
@@ -52,50 +54,36 @@ const Transfer = ({ user }) => {
   }, []);
 
   // Fetch user accounts
-  const fetchAccounts = async () => {
-    try {
-      const token = localStorage.getItem("bankToken");
-      const response = await fetch(
-        "https://bankishbackend.onrender.com/api/accounts",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await response.json();
-      setAccounts(data);
 
-      if (data.length > 0) {
-        setTransferData((prev) => ({
-          ...prev,
-          internal: { ...prev.internal, fromAccountId: data[0]._id },
-          swift: { ...prev.swift, fromAccountId: data[0]._id },
-          sepa: { ...prev.sepa, fromAccountId: data[0]._id },
-          crypto: { ...prev.crypto, fromAccountId: data[0]._id },
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching accounts:", error);
+const fetchAccounts = async () => {
+  try {
+    const data = await api.get("/accounts"); // clean GET
+    setAccounts(data);
+
+    if (data.length > 0) {
+      setTransferData((prev) => ({
+        ...prev,
+        internal: { ...prev.internal, fromAccountId: data[0]._id },
+        swift: { ...prev.swift, fromAccountId: data[0]._id },
+        sepa: { ...prev.sepa, fromAccountId: data[0]._id },
+        crypto: { ...prev.crypto, fromAccountId: data[0]._id },
+      }));
     }
-  };
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+  }
+};
+
 
   // Fetch user's AWC code
-  const fetchAwcCode = async () => {
-    try {
-      const token = localStorage.getItem("bankToken");
-      const response = await fetch(
-        "https://bankishbackend.onrender.com/api/auth/me",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await response.json();
-      if (response.ok) {
-        setAwcCode(data.awcCode); // assumes backend sends { awcCode: "1234" }
-      }
-    } catch (error) {
-      console.error("Error fetching AWC code:", error);
-    }
-  };
+const fetchAwcCode = async () => {
+  try {
+    const data = await api.get("/auth/me"); // GET via api wrapper
+    setAwcCode(data.awcCode); // assumes backend sends { awcCode: "1234" }
+  } catch (error) {
+    console.error("Error fetching AWC code:", error);
+  }
+};
 
   const handleChange = (section, field, value) => {
     setTransferData((prev) => ({
@@ -142,63 +130,46 @@ const Transfer = ({ user }) => {
     }, 2000); // 2s delay before modal
   };
 
-  // Confirm transfer after AWC validation
-  const confirmTransfer = async () => {
-    if (enteredAwc !== awcCode) {
-      setAwcError("Invalid AWC code. Please try again.");
-      return;
-    }
 
-    setAwcError("");
-    setLoading(true);
+const confirmTransfer = async () => {
+  if (enteredAwc !== awcCode) {
+    setAwcError("Invalid AWC code. Please try again.");
+    return;
+  }
 
-    const payload = {
-      transferType: transferData.transferType,
-      ...transferData.common,
-      ...(transferData[transferData.transferType]),
-    };
+  setAwcError("");
+  setLoading(true);
 
-    if (transferData.transferType === "swift") {
-      payload.toAccount = transferData.swift.beneficiaryIban;
-    }
-    if (transferData.transferType === "sepa") {
-      payload.toAccount = transferData.sepa.beneficiaryIban;
-    }
-    if (transferData.transferType === "crypto") {
-      payload.toAccount = transferData.crypto.toAddress;
-    }
-
-    try {
-      const token = localStorage.getItem("bankToken");
-      const response = await fetch(
-        "https://bankishbackend.onrender.com/api/transactions/transfer",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess(true);
-        await fetchAccounts();
-        setTimeout(() => setSuccess(false), 5000);
-      } else {
-        setAwcError(data.message || "Transfer failed.");
-      }
-    } catch (error) {
-      setAwcError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-      setShowAwcModal(false);
-      setEnteredAwc("");
-    }
+  const payload = {
+    transferType: transferData.transferType,
+    ...transferData.common,
+    ...(transferData[transferData.transferType]),
   };
+
+  if (transferData.transferType === "swift") {
+    payload.toAccount = transferData.swift.beneficiaryIban;
+  }
+  if (transferData.transferType === "sepa") {
+    payload.toAccount = transferData.sepa.beneficiaryIban;
+  }
+  if (transferData.transferType === "crypto") {
+    payload.toAccount = transferData.crypto.toAddress;
+  }
+
+  try {
+    const data = await api.post("/transactions/transfer", payload);
+
+    setSuccess(true);
+    await fetchAccounts();
+    setTimeout(() => setSuccess(false), 5000);
+  } catch (error) {
+    setAwcError(error.message || "Transfer failed.");
+  } finally {
+    setLoading(false);
+    setShowAwcModal(false);
+    setEnteredAwc("");
+  }
+};
 
   // Success screen
   if (success) {

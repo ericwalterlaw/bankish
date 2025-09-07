@@ -23,6 +23,7 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
+import { api } from '../api';
 
 ChartJS.register(
   CategoryScale,
@@ -51,33 +52,25 @@ const Dashboard = ({ user }) => {
     fetchRates();
   }, []);
 
-  const fetchDashboardData = async () => {
-    try {
-      const token = localStorage.getItem('bankToken');
-      const response = await fetch('https://bankishbackend.onrender.com/api/dashboard/stats', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      setDashboardData(data);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchDashboardData = async () => {
+  try {
+    const data = await api.get("/dashboard/stats"); // ✅ token handled in api.js
+    setDashboardData(data);
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const fetchAccounts = async () => {
-    try {
-      const token = localStorage.getItem('bankToken');
-      const response = await fetch('https://bankishbackend.onrender.com/api/accounts', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      setAccounts(data);
-    } catch (error) {
-      console.error('Error fetching accounts:', error);
-    }
-  };
+const fetchAccounts = async () => {
+  try {
+    const data = await api.get("/accounts"); // ✅ auto-attaches token
+    setAccounts(data);
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+  }
+};
 
   const fetchRates = async () => {
     try {

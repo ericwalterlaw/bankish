@@ -10,6 +10,9 @@ import {
   Trash2,
   CheckCircle,
 } from "lucide-react";
+import { api } from "../api";
+
+
 
 const BillPay = ({ user }) => {
   const [activeTab, setActiveTab] = useState("pay");
@@ -66,27 +69,22 @@ const BillPay = ({ user }) => {
 
   // ✅ Fetch accounts from backend
   useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const token = localStorage.getItem("bankToken");
-        const response = await fetch(
-          "https://bankishbackend.onrender.com/api/accounts",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const data = await response.json();
-        setAccounts(data);
+   const fetchAccounts = async () => {
+  try {
+    const data = await api.get("/accounts"); // ✅ token handled in api.js
+    setAccounts(data);
 
-        // default to first account if available
-        if (data.length > 0) {
-          setBillData((prev) => ({ ...prev, account: data[0]._id }));
-        }
-      } catch (error) {
-        console.error("Error fetching accounts:", error);
-      }
-    };
-
+    // ✅ default to first account if available
+    if (data.length > 0) {
+      setBillData((prev) => ({
+        ...prev,
+        account: data[0]._id,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+  }
+};
     fetchAccounts();
   }, []);
 
