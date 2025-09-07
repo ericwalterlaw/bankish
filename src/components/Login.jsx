@@ -48,7 +48,7 @@ const handleSubmit = async (e) => {
             <div className="mx-auto w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-4">
               <Building2 className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">SecureBank</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Horizon Financials</h2>
             <p className="mt-2 text-gray-600">
               {isLogin ? 'Sign in to your account' : 'Create your account'}
             </p>
@@ -157,16 +157,6 @@ const handleSubmit = async (e) => {
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
           </div>
-
-          {isLogin && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>Demo Account:</strong><br />
-                Email: demo@securebank.com<br />
-                Password: demo123
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
