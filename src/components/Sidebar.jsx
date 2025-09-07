@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
+const NAME = import.meta.env.VITE_NAME;
+
+
 const Sidebar = ({ sidebarOpen, setSidebarOpen, onLogout }) => {
   const location = useLocation();
 
@@ -27,8 +30,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, onLogout }) => {
     { path: "/cards", label: "Cards", icon: <CreditCard className="w-5 h-5" /> },
     // { path: "/investments", label: "Investments", icon: <BarChart2 className="w-5 h-5" /> },
     { path: "/profile", label: "Profile", icon: <User className="w-5 h-5" /> },
-    { path: "/help", label: "Customer Service", icon: <Phone className="w-5 h-5" /> },
+    // { path: "/help", label: "Customer Service", icon: <Phone className="w-5 h-5" /> },
   ];
+
 
   return (
     <>
@@ -46,7 +50,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, onLogout }) => {
               sidebarOpen ? "opacity-100" : "opacity-0 lg:hidden"
             }`}
           >
-            MyBank
+            {NAME}
           </span>
           <button
             className="hidden lg:flex items-center justify-center p-1 rounded-md hover:bg-gray-100"

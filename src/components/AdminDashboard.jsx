@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../api";
+import AdminLayout from "./AdminLayout";
+
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -74,6 +76,7 @@ const handleAddTransaction = async () => {
   const selectedUser = users.find((u) => u._id === transactionData.userId);
 
   return (
+    <AdminLayout>
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Admin Dashboard</h1>
 
@@ -233,6 +236,7 @@ const handleAddTransaction = async () => {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 };
 

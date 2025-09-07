@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Building2, Eye, EyeOff } from 'lucide-react';
 import { api } from '../api';
 
+const NAME = import.meta.env.VITE_NAME;
+
+
 const Login = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +51,7 @@ const handleSubmit = async (e) => {
             <div className="mx-auto w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-4">
               <Building2 className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Horizon Financials</h2>
+            <h2 className="text-3xl font-bold text-gray-900">{NAME}</h2>
             <p className="mt-2 text-gray-600">
               {isLogin ? 'Sign in to your account' : 'Create your account'}
             </p>
