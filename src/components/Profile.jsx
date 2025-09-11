@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Shield, Bell, Eye, EyeOff } from 'lucide-react';
 import { api } from '../api';
+import { toast } from "react-toastify";
 
 
 const Profile = ({ onUpdate }) => {
@@ -79,12 +80,12 @@ const handleAvatarChange = async (e) => {
     // `true` here could be a flag you handle in api.js for multipart/form-data
 
     if (data.success) {
-      alert("Avatar updated successfully!");
+      toast.success("Avatar updated successfully!");
       setAvatar(data.avatar);
     }
   } catch (error) {
     console.error("Upload failed:", error);
-    alert("Failed to upload avatar");
+    toast.error("Failed to upload avatar");
   }
 };
 
@@ -93,11 +94,11 @@ const handleProfileUpdate = async (e) => {
   e.preventDefault();
   try {
     await api.put("/user/profile", profileData);
-    alert("Profile updated successfully!");
+    toast.success("Profile updated successfully!");
     if (onUpdate) onUpdate();
   } catch (error) {
     console.error("Error updating profile:", error);
-    alert("Failed to update profile");
+    toast.error("Failed to update profile");
   }
 };
 
@@ -105,7 +106,7 @@ const handleProfileUpdate = async (e) => {
 const handlePasswordChange = async (e) => {
   e.preventDefault();
   if (passwordData.newPassword !== passwordData.confirmPassword) {
-    alert("New passwords do not match");
+    toast.error("New passwords do not match");
     return;
   }
 
@@ -115,11 +116,11 @@ const handlePasswordChange = async (e) => {
       newPassword: passwordData.newPassword,
     });
 
-    alert("Password changed successfully!");
+    toast.success("Password changed successfully!");
     setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
   } catch (error) {
     console.error("Error changing password:", error);
-    alert("Failed to change password");
+    toast.error("Failed to change password");
   }
 };
 

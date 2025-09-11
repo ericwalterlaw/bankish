@@ -18,7 +18,7 @@ import { Link, useLocation } from "react-router-dom";
 const NAME = import.meta.env.VITE_NAME;
 
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen, onLogout }) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen, onLogout, user }) => {
   const location = useLocation();
 
   const navItems = [
@@ -33,6 +33,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, onLogout }) => {
     // { path: "/help", label: "Customer Service", icon: <Phone className="w-5 h-5" /> },
   ];
 
+  
+if (user?.role === "admin") {
+  navItems.push({
+    path: "/admin",
+    label: "Admin",
+    icon: <User className="w-5 h-5" />
+  });
+}
 
   return (
     <>

@@ -11,6 +11,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { api } from "../api";
+import { toast } from "react-toastify";
+
 
 
 
@@ -120,7 +122,7 @@ const BillPay = ({ user }) => {
         memo: "",
       });
     } else {
-      alert("Invalid withdrawal code");
+      toast.error("Invalid withdrawal code");
     }
   };
 

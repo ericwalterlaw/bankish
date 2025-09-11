@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../api";
 import AdminLayout from "./AdminLayout";
+import { toast } from "react-toastify";
+
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -38,7 +40,7 @@ const AdminDashboard = () => {
       await api.patch(`/admin/accounts/${selectedAccount}`, {
         balance: Number(newBalance),
       });
-      alert("Balance updated!");
+      toast.success("Balance updated!");
       setNewBalance("");
       setSelectedAccount(null);
       fetchUsers();
@@ -51,7 +53,7 @@ const AdminDashboard = () => {
   const handleAddTransaction = async () => {
     try {
       await api.post("/admin/transactions", transactionData);
-      alert("Transaction added!");
+      toast.success("Transaction added!");
       setTransactionData({
         userId: "",
         accountId: "",
@@ -72,7 +74,7 @@ const AdminDashboard = () => {
 
     try {
       await api.delete(`/admin/transactions/${transactionId}`);
-      alert("Transaction deleted!");
+      toast.success("Transaction deleted!");
       fetchUsers();
     } catch (err) {
       console.error("Error deleting transaction:", err);

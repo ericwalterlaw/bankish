@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Building2, Eye, EyeOff } from 'lucide-react';
 import { api } from '../api';
+import { toast } from "react-toastify";
+
 
 const NAME = import.meta.env.VITE_NAME;
 
@@ -30,7 +32,7 @@ const handleSubmit = async (e) => {
 
     onLogin(data); // assumes backend sends token + user info
   } catch (error) {
-    alert(error.message || "Network error. Please try again.");
+    toast.error("Invalid Credentials" || "Network error. Please try again.");
   } finally {
     setLoading(false);
   }

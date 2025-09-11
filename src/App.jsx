@@ -78,6 +78,7 @@ const fetchUserData = async () => {
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
           onLogout={handleLogout}
+          user={user}
         />
 
         {/* Main Area */}
